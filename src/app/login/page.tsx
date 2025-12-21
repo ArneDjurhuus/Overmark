@@ -47,7 +47,7 @@ function LoginContent() {
               data: {
                 display_name: `Værelse ${room}`,
                 room_number: room,
-                role: 'beboer', // Default role
+                role: 'resident', // Default role
               },
             },
           });
