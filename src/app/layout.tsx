@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Overmarksgården Intra",
   description: "Overmarksgården Intra – et digitalt hjem for beboere og personale.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

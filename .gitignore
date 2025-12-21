@@ -32,12 +32,19 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
 # agent tooling
 /.serena/
+
+# Capacitor / Android build artifacts
+/android/app/build/
+/android/.gradle/
+*.apk
+*.aab
 
 # typescript
 *.tsbuildinfo

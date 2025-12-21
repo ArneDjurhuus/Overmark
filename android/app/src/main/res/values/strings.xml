@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Overmarksgaarden Intra</string>
+    <string name="title_activity_main">Overmarksgaarden Intra</string>
+    <string name="package_name">dk.overmarksgaarden.intra</string>
+    <string name="custom_url_scheme">dk.overmarksgaarden.intra</string>
+</resources>

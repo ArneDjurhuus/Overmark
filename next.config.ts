@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
+import nextPwa from "next-pwa";
+
+const withPWA = nextPwa({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+});
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Static export for Capacitor Android/iOS builds
+  output: "export",
+  // Disable image optimization for static export
+  images: {
+    unoptimized: true,
+  },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
