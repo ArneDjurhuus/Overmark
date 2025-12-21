@@ -6,9 +6,12 @@ const withPWA = nextPwa({
   disable: process.env.NODE_ENV === "development",
 });
 
+const isDev = process.env.NODE_ENV === "development";
+
 const nextConfig: NextConfig = {
-  // Static export for Capacitor Android/iOS builds
-  output: "export",
+  // Static export only for production (Capacitor Android/iOS builds)
+  // Disabled in dev to allow middleware/proxy
+  ...(isDev ? {} : { output: "export" }),
   // Disable image optimization for static export
   images: {
     unoptimized: true,
