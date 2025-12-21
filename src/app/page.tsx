@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Utensils, Home as HomeIcon, Calendar, MessageCircleHeart, Sparkles, Building2, ExternalLink, Clock } from "lucide-react";
+import { Utensils, Home as HomeIcon, Calendar, MessageCircle, Sparkles, Building2, ExternalLink, Clock, CalendarDays } from "lucide-react";
 import { DynamicBackground } from "./components/DynamicBackground";
 import { AnimatedCard } from "./components/AnimatedCard";
+import Link from "next/link";
 
 const housingLinks = [
   { name: "Boligportalen", url: "https://www.boligportalen.dk", color: "bg-blue-500" },
@@ -157,113 +158,125 @@ export default function Home() {
           animate="show"
           className="grid gap-5 sm:grid-cols-2"
         >
-          {/* Dagens ret */}
+          {/* Madplan */}
           <motion.div variants={item}>
-            <AnimatedCard
-              icon={<Utensils className="w-6 h-6 text-orange-600" />}
-              delay={0}
-              accentColor="from-orange-100/80 to-amber-50/60"
-            >
-              <h3 className="text-lg font-semibold text-zinc-800 mb-1">
-                Dagens ret
-              </h3>
-              <p className="text-zinc-600 text-sm mb-3">
-                Se hvad køkkenet byder på i dag
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-full bg-gradient-to-r from-orange-200/80 to-orange-100/40 rounded-full animate-pulse" />
-                  <div className="h-3 w-2/3 bg-gradient-to-r from-orange-200/60 to-orange-100/30 rounded-full animate-pulse" />
-                </div>
-                <motion.span
-                  className="text-3xl"
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  🍲
-                </motion.span>
-              </div>
-            </AnimatedCard>
-          </motion.div>
-
-          {/* Husets status */}
-          <motion.div variants={item}>
-            <AnimatedCard
-              icon={<HomeIcon className="w-6 h-6 text-emerald-600" />}
-              delay={0.1}
-              accentColor="from-emerald-100/80 to-teal-50/60"
-            >
-              <h3 className="text-lg font-semibold text-zinc-800 mb-1">
-                Husets status
-              </h3>
-              <p className="text-zinc-600 text-sm mb-3">
-                Hvad sker der lige nu?
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
-                </span>
-                <span className="text-sm text-emerald-700 font-medium">
-                  Alt kører normalt
-                </span>
-              </div>
-            </AnimatedCard>
-          </motion.div>
-
-          {/* Aktiviteter */}
-          <motion.div variants={item}>
-            <AnimatedCard
-              icon={<Calendar className="w-6 h-6 text-purple-600" />}
-              delay={0.2}
-              accentColor="from-purple-100/80 to-violet-50/60"
-            >
-              <h3 className="text-lg font-semibold text-zinc-800 mb-1">
-                Aktiviteter
-              </h3>
-              <p className="text-zinc-600 text-sm mb-3">
-                Se ugens program og tilmeld dig
-              </p>
-              <div className="flex gap-2">
-                {["Ma", "Ti", "On", "To", "Fr", "Lø", "Sø"].map((day, i) => (
-                  <motion.div
-                    key={day}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium ${
-                      i === new Date().getDay() - 1 || (new Date().getDay() === 0 && i === 6)
-                        ? "bg-purple-500 text-white shadow-lg shadow-purple-500/30"
-                        : "bg-white/50 text-zinc-600"
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {day}
-                  </motion.div>
-                ))}
-              </div>
-            </AnimatedCard>
-          </motion.div>
-
-          {/* Snak med en */}
-          <motion.div variants={item}>
-            <AnimatedCard
-              icon={<MessageCircleHeart className="w-6 h-6 text-rose-600" />}
-              delay={0.3}
-              accentColor="from-rose-100/80 to-pink-50/60"
-            >
-              <h3 className="text-lg font-semibold text-zinc-800 mb-1">
-                Brug for en snak?
-              </h3>
-              <p className="text-zinc-600 text-sm mb-3">
-                Book tid med en medarbejder
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-medium shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30 transition-shadow"
+            <Link href="/madplan">
+              <AnimatedCard
+                icon={<Utensils className="w-6 h-6 text-orange-600" />}
+                delay={0}
+                accentColor="from-orange-100/80 to-amber-50/60"
+                ariaLabel="Gå til madplan"
               >
-                Anmod om samtale
-              </motion.button>
-            </AnimatedCard>
+                <h3 className="text-lg font-semibold text-zinc-800 mb-1">
+                  Madplan
+                </h3>
+                <p className="text-zinc-600 text-sm mb-3">
+                  Se ugens måltider
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-full bg-gradient-to-r from-orange-200/80 to-orange-100/40 rounded-full animate-pulse" />
+                    <div className="h-3 w-2/3 bg-gradient-to-r from-orange-200/60 to-orange-100/30 rounded-full animate-pulse" />
+                  </div>
+                  <motion.span
+                    className="text-3xl"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  >
+                    🍲
+                  </motion.span>
+                </div>
+              </AnimatedCard>
+            </Link>
+          </motion.div>
+
+          {/* Fælleskalender */}
+          <motion.div variants={item}>
+            <Link href="/faelleskalender">
+              <AnimatedCard
+                icon={<Calendar className="w-6 h-6 text-purple-600" />}
+                delay={0.1}
+                accentColor="from-purple-100/80 to-violet-50/60"
+                ariaLabel="Gå til fælleskalender"
+              >
+                <h3 className="text-lg font-semibold text-zinc-800 mb-1">
+                  Fælleskalender
+                </h3>
+                <p className="text-zinc-600 text-sm mb-3">
+                  Se husets aktiviteter
+                </p>
+                <div className="flex gap-2">
+                  {["Ma", "Ti", "On", "To", "Fr", "Lø", "Sø"].map((day, i) => (
+                    <motion.div
+                      key={day}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium ${
+                        i === new Date().getDay() - 1 || (new Date().getDay() === 0 && i === 6)
+                          ? "bg-purple-500 text-white shadow-lg shadow-purple-500/30"
+                          : "bg-white/50 text-zinc-600"
+                      }`}
+                    >
+                      {day}
+                    </motion.div>
+                  ))}
+                </div>
+              </AnimatedCard>
+            </Link>
+          </motion.div>
+
+          {/* Min Kalender */}
+          <motion.div variants={item}>
+            <Link href="/min-kalender">
+              <AnimatedCard
+                icon={<CalendarDays className="w-6 h-6 text-blue-600" />}
+                delay={0.2}
+                accentColor="from-blue-100/80 to-sky-50/60"
+                ariaLabel="Gå til din personlige kalender"
+              >
+                <h3 className="text-lg font-semibold text-zinc-800 mb-1">
+                  Min Kalender
+                </h3>
+                <p className="text-zinc-600 text-sm mb-3">
+                  Dine personlige aftaler
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500" />
+                  </span>
+                  <span className="text-sm text-blue-700 font-medium">
+                    Hold styr på dine aftaler
+                  </span>
+                </div>
+              </AnimatedCard>
+            </Link>
+          </motion.div>
+
+          {/* Snakkerum */}
+          <motion.div variants={item}>
+            <Link href="/snakkerum">
+              <AnimatedCard
+                icon={<MessageCircle className="w-6 h-6 text-emerald-600" />}
+                delay={0.3}
+                accentColor="from-emerald-100/80 to-teal-50/60"
+                ariaLabel="Gå til snakkerum"
+              >
+                <h3 className="text-lg font-semibold text-zinc-800 mb-1">
+                  Snakkerum
+                </h3>
+                <p className="text-zinc-600 text-sm mb-3">
+                  Chat med andre beboere
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+                  </span>
+                  <span className="text-sm text-emerald-700 font-medium">
+                    Fælles snak
+                  </span>
+                </div>
+              </AnimatedCard>
+            </Link>
           </motion.div>
         </motion.div>
 
