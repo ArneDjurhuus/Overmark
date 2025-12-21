@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 type Props = {
   href: string;
@@ -11,8 +11,13 @@ type Props = {
 };
 
 export function MotionLinkButton({ href, children, className, ariaLabel }: Props) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
-    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+    <motion.div
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+    >
       <Link
         href={href}
         aria-label={ariaLabel}

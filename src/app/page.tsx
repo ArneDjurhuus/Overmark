@@ -91,11 +91,6 @@ export default function Home() {
   const { greeting } = useTimeGreeting();
   const prefersReducedMotion = useReducedMotion();
 
-  const motionConfig = useMemo(
-    () => (prefersReducedMotion ? { initial: {}, animate: {}, transition: {} } : {}),
-    [prefersReducedMotion]
-  );
-
   return (
     <DynamicBackground className="px-4 py-6 pb-24">
       <main className="mx-auto w-full max-w-4xl">
@@ -133,8 +128,8 @@ export default function Home() {
               {greeting}{" "}
               <motion.span
                 className="inline-block"
-                animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
-                transition={{ duration: 2.5, delay: 1, repeat: Infinity, repeatDelay: 5 }}
+                animate={prefersReducedMotion ? undefined : { rotate: [0, 14, -8, 14, -4, 10, 0] }}
+                transition={prefersReducedMotion ? undefined : { duration: 2.5, delay: 1, repeat: Infinity, repeatDelay: 5 }}
               >
                 👋
               </motion.span>

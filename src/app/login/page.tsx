@@ -4,6 +4,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -94,11 +95,17 @@ function LoginContent() {
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="mb-6 text-6xl"
+        className="mb-6 flex justify-center"
       >
-        {status === 'loading' && '🔄'}
-        {status === 'success' && '✅'}
-        {status === 'error' && '❌'}
+        {status === 'loading' && (
+          <Loader2 className="w-16 h-16 text-blue-500 animate-spin" />
+        )}
+        {status === 'success' && (
+          <CheckCircle className="w-16 h-16 text-green-500" />
+        )}
+        {status === 'error' && (
+          <XCircle className="w-16 h-16 text-red-500" />
+        )}
       </motion.div>
       
       <h2 className="text-2xl font-bold text-gray-800 mb-2">

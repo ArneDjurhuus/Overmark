@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Utensils, ChevronLeft, ChevronRight, Leaf, AlertTriangle } from "lucide-react";
+import { Utensils, ChevronLeft, ChevronRight, Leaf, AlertTriangle, AlertCircle } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -53,6 +53,7 @@ export default function MadplanPage() {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   const weekDates = getWeekDates(weekOffset);
@@ -64,15 +65,23 @@ export default function MadplanPage() {
 
     async function fetchMeals() {
       setLoading(true);
-      const { data } = await supabase
-        .from("meals")
-        .select("*")
-        .gte("date", startDate)
-        .lte("date", endDate)
-        .order("date");
+      setError(null);
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("meals")
+          .select("*")
+          .gte("date", startDate)
+          .lte("date", endDate)
+          .order("date");
 
-      setMeals(data || []);
-      setLoading(false);
+        if (fetchError) throw fetchError;
+        setMeals(data || []);
+      } catch (err) {
+        console.error("Error fetching meals:", err);
+        setError("Kunne ikke hente madplanen. Prøv igen senere.");
+      } finally {
+        setLoading(false);
+      }
     }
 
     fetchMeals();
@@ -121,7 +130,7 @@ export default function MadplanPage() {
         >
           <button
             onClick={() => setWeekOffset((w) => w - 1)}
-            className="p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors"
+            className="min-w-12 min-h-12 p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors flex items-center justify-center"
             aria-label="Forrige uge"
           >
             <ChevronLeft className="w-5 h-5 text-zinc-700" />
@@ -142,12 +151,24 @@ export default function MadplanPage() {
           </div>
           <button
             onClick={() => setWeekOffset((w) => w + 1)}
-            className="p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors"
+            className="min-w-12 min-h-12 p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors flex items-center justify-center"
             aria-label="Næste uge"
           >
             <ChevronRight className="w-5 h-5 text-zinc-700" />
           </button>
         </motion.div>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">{error}</p>
+          </motion.div>
+        )}
 
         {/* Meals Grid */}
         <div className="space-y-4">

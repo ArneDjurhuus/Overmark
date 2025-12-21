@@ -8,6 +8,7 @@ import {
   ChevronRight,
   MapPin,
   Tag,
+  AlertCircle,
 } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
@@ -79,6 +80,7 @@ export default function FaelleskalenderPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export default function FaelleskalenderPage() {
 
     async function fetchActivities() {
       setLoading(true);
+      setError(null);
       const startOfMonth = new Date(
         currentMonth.getFullYear(),
         currentMonth.getMonth(),
@@ -100,15 +103,22 @@ export default function FaelleskalenderPage() {
         59
       );
 
-      const { data } = await supabase
-        .from("activities")
-        .select("*")
-        .gte("starts_at", startOfMonth.toISOString())
-        .lte("starts_at", endOfMonth.toISOString())
-        .order("starts_at");
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("activities")
+          .select("*")
+          .gte("starts_at", startOfMonth.toISOString())
+          .lte("starts_at", endOfMonth.toISOString())
+          .order("starts_at");
 
-      setActivities(data || []);
-      setLoading(false);
+        if (fetchError) throw fetchError;
+        setActivities(data || []);
+      } catch (err) {
+        console.error("Error fetching activities:", err);
+        setError("Kunne ikke hente aktiviteter. Prøv igen senere.");
+      } finally {
+        setLoading(false);
+      }
     }
 
     fetchActivities();
@@ -169,7 +179,7 @@ export default function FaelleskalenderPage() {
                 new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
               )
             }
-            className="p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors"
+            className="min-w-12 min-h-12 p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors flex items-center justify-center"
             aria-label="Forrige måned"
           >
             <ChevronLeft className="w-5 h-5 text-zinc-700" />
@@ -183,12 +193,24 @@ export default function FaelleskalenderPage() {
                 new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
               )
             }
-            className="p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors"
+            className="min-w-12 min-h-12 p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors flex items-center justify-center"
             aria-label="Næste måned"
           >
             <ChevronRight className="w-5 h-5 text-zinc-700" />
           </button>
         </motion.div>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">{error}</p>
+          </motion.div>
+        )}
 
         {/* Activities List */}
         {loading ? (

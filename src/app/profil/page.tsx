@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   User,
   ChevronRight,
@@ -10,6 +10,7 @@ import {
   Bell,
   Moon,
   Shield,
+  AlertCircle,
 } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
@@ -51,28 +52,37 @@ function getRoleColor(role: string): string {
 export default function ProfilPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     async function loadProfile() {
       const supabase = createSupabaseBrowserClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (!user) {
-        router.push("/login");
-        return;
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        const { data, error: fetchError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (fetchError) throw fetchError;
+        setProfile(data);
+      } catch (err) {
+        console.error("Error loading profile:", err);
+        setError("Kunne ikke hente din profil. Prøv igen senere.");
+      } finally {
+        setLoading(false);
       }
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      setProfile(data);
-      setLoading(false);
     }
 
     loadProfile();
@@ -99,6 +109,18 @@ export default function ProfilPage() {
         >
           <h1 className="text-3xl font-bold text-zinc-800">Profil</h1>
         </motion.div>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">{error}</p>
+          </motion.div>
+        )}
 
         {loading ? (
           <div className="space-y-4">

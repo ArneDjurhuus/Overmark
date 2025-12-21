@@ -1,7 +1,14 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+// Singleton instance to avoid creating multiple clients
+let browserClient: SupabaseClient | null = null;
+
 export function createSupabaseBrowserClient(): SupabaseClient {
+  if (browserClient) {
+    return browserClient;
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -11,5 +18,6 @@ export function createSupabaseBrowserClient(): SupabaseClient {
     );
   }
 
-  return createBrowserClient(url, anonKey);
+  browserClient = createBrowserClient(url, anonKey);
+  return browserClient;
 }

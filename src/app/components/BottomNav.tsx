@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Home, Utensils, Calendar, MessageCircle, User } from "lucide-react";
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
 
   // Don't show on login page
   if (pathname === "/login") return null;
@@ -36,9 +37,9 @@ export function BottomNav() {
             >
               {isActive && (
                 <motion.div
-                  layoutId="nav-indicator"
+                  layoutId={prefersReducedMotion ? undefined : "nav-indicator"}
                   className="absolute inset-0 bg-blue-100 rounded-2xl"
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}
               <Icon
