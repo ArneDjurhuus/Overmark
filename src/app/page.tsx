@@ -97,14 +97,14 @@ export default function Home() {
   );
 
   return (
-    <DynamicBackground className="px-4 py-8 sm:px-6 lg:px-8">
+    <DynamicBackground className="px-4 py-6 pb-24">
       <main className="mx-auto w-full max-w-4xl">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-10"
+          className="mb-8"
         >
           {/* Top bar with badge and clock */}
           <div className="flex items-center justify-between mb-6">

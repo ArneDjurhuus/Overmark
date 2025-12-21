@@ -9,12 +9,10 @@ import {
   Plus,
   X,
   Clock,
-  Trash2,
 } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import Link from "next/link";
 
 type PrivateEvent = {
   id: string;
@@ -108,17 +106,10 @@ export default function MinKalenderPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+          className="flex items-center justify-between mb-6"
         >
-          <Link
-            href="/"
-            className="p-3 rounded-2xl bg-white/40 backdrop-blur-md border border-white/30 hover:bg-white/50 transition-colors"
-            aria-label="Tilbage til forsiden"
-          >
-            <ChevronLeft className="w-6 h-6 text-zinc-700" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-zinc-800">Min Kalender</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-800">Min Kalender</h1>
             <p className="text-zinc-600">Dine personlige aftaler</p>
           </div>
           <button

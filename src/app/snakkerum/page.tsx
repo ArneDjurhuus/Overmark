@@ -4,14 +4,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   MessageCircle,
-  ChevronLeft,
   Send,
   AlertCircle,
   User,
 } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import Link from "next/link";
 
 type ChatMessage = {
   id: string;
@@ -233,19 +231,8 @@ export default function SnakkerumPage() {
           animate={{ opacity: 1, y: 0 }}
           className="flex-shrink-0 px-4 py-4 bg-white/60 backdrop-blur-lg border-b border-white/30"
         >
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="p-3 rounded-2xl bg-white/40 backdrop-blur-md border border-white/30 hover:bg-white/50 transition-colors"
-              aria-label="Tilbage til forsiden"
-            >
-              <ChevronLeft className="w-6 h-6 text-zinc-700" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-zinc-800">Snakkerum</h1>
-              <p className="text-sm text-zinc-600">Chat med andre beboere</p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold text-zinc-800">Snakkerum</h1>
+          <p className="text-sm text-zinc-600">Chat med andre beboere</p>
         </motion.div>
 
         {/* Banned Message */}

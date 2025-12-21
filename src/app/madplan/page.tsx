@@ -6,7 +6,6 @@ import { Utensils, ChevronLeft, ChevronRight, Leaf, AlertTriangle } from "lucide
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import Link from "next/link";
 
 type Meal = {
   id: string;
@@ -107,19 +106,10 @@ export default function MadplanPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+          className="mb-6"
         >
-          <Link
-            href="/"
-            className="p-3 rounded-2xl bg-white/40 backdrop-blur-md border border-white/30 hover:bg-white/50 transition-colors"
-            aria-label="Tilbage til forsiden"
-          >
-            <ChevronLeft className="w-6 h-6 text-zinc-700" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-zinc-800">Madplan</h1>
-            <p className="text-zinc-600">Se ugens måltider</p>
-          </div>
+          <h1 className="text-2xl font-bold text-zinc-800">Madplan</h1>
+          <p className="text-zinc-600">Se ugens måltider</p>
         </motion.div>
 
         {/* Week Navigation */}
