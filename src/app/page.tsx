@@ -1,9 +1,19 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Utensils, Home as HomeIcon, Calendar, MessageCircleHeart, Sparkles } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Utensils, Home as HomeIcon, Calendar, MessageCircleHeart, Sparkles, Building2, ExternalLink, Clock } from "lucide-react";
 import { DynamicBackground } from "./components/DynamicBackground";
 import { AnimatedCard } from "./components/AnimatedCard";
+
+const housingLinks = [
+  { name: "Boligportalen", url: "https://www.boligportalen.dk", color: "bg-blue-500" },
+  { name: "Lejebolig", url: "https://www.lejebolig.dk", color: "bg-emerald-500" },
+  { name: "Boligsiden", url: "https://www.boligsiden.dk", color: "bg-orange-500" },
+  { name: "DBA Boliger", url: "https://www.dba.dk/boliger", color: "bg-rose-500" },
+  { name: "Findbolig", url: "https://www.findbolig.nu", color: "bg-purple-500" },
+  { name: "AKU Aarhus", url: "https://www.LejIAarhus.dk", color: "bg-teal-500" },
+];
 
 const container = {
   hidden: { opacity: 0 },
@@ -21,16 +31,70 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
-function TimeGreeting() {
-  const hour = new Date().getHours();
+function useTimeGreeting() {
+  const [now, setNow] = useState(() => new Date());
 
-  if (hour >= 5 && hour < 12) return "God morgen";
-  if (hour >= 12 && hour < 18) return "God eftermiddag";
-  if (hour >= 18 && hour < 22) return "God aften";
-  return "God nat";
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const greeting = useMemo(() => {
+    const hour = now.getHours();
+    if (hour >= 5 && hour < 12) return "God morgen";
+    if (hour >= 12 && hour < 18) return "God eftermiddag";
+    if (hour >= 18 && hour < 22) return "God aften";
+    return "God nat";
+  }, [now]);
+
+  const timeString = useMemo(() => {
+    return now.toLocaleTimeString("da-DK", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [now]);
+
+  const dateString = useMemo(() => {
+    return now.toLocaleDateString("da-DK", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  }, [now]);
+
+  return { greeting, timeString, dateString };
+}
+
+function LiveClock() {
+  const { timeString, dateString } = useTimeGreeting();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.1, duration: 0.4 }}
+      className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/40 backdrop-blur-md border border-white/30 shadow-lg"
+    >
+      <Clock className="w-5 h-5 text-zinc-600" />
+      <div className="text-right">
+        <div className="text-2xl font-bold tabular-nums text-zinc-800 leading-tight">
+          {timeString}
+        </div>
+        <div className="text-xs text-zinc-500 capitalize">{dateString}</div>
+      </div>
+    </motion.div>
+  );
 }
 
 export default function Home() {
+  const { greeting } = useTimeGreeting();
+  const prefersReducedMotion = useReducedMotion();
+
+  const motionConfig = useMemo(
+    () => (prefersReducedMotion ? { initial: {}, animate: {}, transition: {} } : {}),
+    [prefersReducedMotion]
+  );
+
   return (
     <DynamicBackground className="px-4 py-8 sm:px-6 lg:px-8">
       <main className="mx-auto w-full max-w-4xl">
@@ -39,37 +103,51 @@ export default function Home() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-10"
+          className="mb-10"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm border border-white/30 shadow-lg mb-6"
-          >
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-medium text-zinc-700">
-              Overmarksgården Intra
-            </span>
-          </motion.div>
+          {/* Top bar with badge and clock */}
+          <div className="flex items-center justify-between mb-6">
+            <motion.div
+              initial={{ scale: 0, x: -20 }}
+              animate={{ scale: 1, x: 0 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm border border-white/30 shadow-lg"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500" aria-hidden="true" />
+              <span className="text-sm font-medium text-zinc-700">
+                Overmarksgården
+              </span>
+            </motion.div>
+            <LiveClock />
+          </div>
 
-          <motion.h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-800 bg-clip-text text-transparent mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <TimeGreeting /> 👋
-          </motion.h1>
+          {/* Main greeting */}
+          <div className="text-center">
+            <motion.h1
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-800 bg-clip-text text-transparent mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              {greeting}{" "}
+              <motion.span
+                className="inline-block"
+                animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
+                transition={{ duration: 2.5, delay: 1, repeat: Infinity, repeatDelay: 5 }}
+              >
+                👋
+              </motion.span>
+            </motion.h1>
 
-          <motion.p
-            className="text-lg sm:text-xl text-zinc-600 max-w-2xl mx-auto leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-          >
-            Dit digitale hjem – alt det vigtige, samlet ét sted
-          </motion.p>
+            <motion.p
+              className="text-lg sm:text-xl text-zinc-600 max-w-2xl mx-auto leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
+              Dit digitale hjem – alt det vigtige, samlet ét sted
+            </motion.p>
+          </div>
         </motion.div>
 
         {/* Quick Actions Grid */}
@@ -189,15 +267,78 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Footer hint */}
-        <motion.p
+        {/* Boligsøgning Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          className="mt-8"
+        >
+          <AnimatedCard
+            icon={<Building2 className="w-6 h-6 text-sky-600" />}
+            delay={0.4}
+            accentColor="from-sky-100/80 to-blue-50/60"
+          >
+            <h3 className="text-lg font-semibold text-zinc-800 mb-1">
+              Boligsøgning
+            </h3>
+            <p className="text-zinc-600 text-sm mb-4">
+              Find din næste bolig – her er de bedste sider
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {housingLinks.map((link, i) => (
+                <motion.a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl ${link.color} text-white text-sm font-medium shadow-md hover:shadow-lg transition-shadow`}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 + i * 0.05 }}
+                >
+                  <span className="truncate">{link.name}</span>
+                  <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+                </motion.a>
+              ))}
+            </div>
+          </AnimatedCard>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
-          className="text-center text-sm text-zinc-500 mt-10"
+          className="mt-12 pb-6 space-y-4"
         >
-          Tryk på et kort for at se mere ✨
-        </motion.p>
+          <div className="flex items-center justify-center gap-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-zinc-300 to-transparent" />
+            <motion.span
+              className="text-zinc-400 text-lg"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              ✨
+            </motion.span>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-zinc-300 to-transparent" />
+          </div>
+          <p className="text-center text-sm text-zinc-500">
+            Tryk på et kort for at se mere
+          </p>
+          <p className="text-center text-xs text-zinc-400">
+            Overmarksgården Intra v1.0 • Lavet med{" "}
+            <motion.span
+              className="inline-block text-rose-400"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+            >
+              ♥
+            </motion.span>
+          </p>
+        </motion.footer>
       </main>
     </DynamicBackground>
   );

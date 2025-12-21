@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 type Props = {
   children: React.ReactNode;
@@ -59,13 +59,20 @@ function getTimeOfDayGradient(date: Date): {
   };
 }
 
-function FloatingOrb({ delay, duration, size, color, position }: {
+function FloatingOrb({ delay, duration, size, color, position, reduceMotion }: {
   delay: number;
   duration: number;
   size: string;
   color: string;
   position: string;
+  reduceMotion?: boolean;
 }) {
+  if (reduceMotion) {
+    return (
+      <div className={`absolute rounded-full blur-3xl opacity-20 ${size} ${color} ${position}`} />
+    );
+  }
+
   return (
     <motion.div
       className={`absolute rounded-full blur-3xl opacity-30 ${size} ${color} ${position}`}
@@ -87,6 +94,7 @@ function FloatingOrb({ delay, duration, size, color, position }: {
 export function DynamicBackground({ children, className }: Props) {
   const [now, setNow] = React.useState<Date>(() => new Date());
   const [mounted, setMounted] = React.useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   React.useEffect(() => {
     setMounted(true);
@@ -110,13 +118,14 @@ export function DynamicBackground({ children, className }: Props) {
     >
       {/* Animated background orbs */}
       {mounted && (
-        <div className="pointer-events-none absolute inset-0">
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <FloatingOrb
             delay={0}
             duration={8}
             size="w-96 h-96"
             color={isNight ? "bg-indigo-500" : "bg-rose-300"}
             position="-top-48 -left-48"
+            reduceMotion={prefersReducedMotion ?? false}
           />
           <FloatingOrb
             delay={2}
@@ -124,6 +133,7 @@ export function DynamicBackground({ children, className }: Props) {
             size="w-80 h-80"
             color={isNight ? "bg-purple-500" : "bg-amber-200"}
             position="top-1/3 -right-40"
+            reduceMotion={prefersReducedMotion ?? false}
           />
           <FloatingOrb
             delay={4}
@@ -131,6 +141,7 @@ export function DynamicBackground({ children, className }: Props) {
             size="w-64 h-64"
             color={isNight ? "bg-sky-600" : "bg-emerald-200"}
             position="bottom-20 left-1/4"
+            reduceMotion={prefersReducedMotion ?? false}
           />
         </div>
       )}

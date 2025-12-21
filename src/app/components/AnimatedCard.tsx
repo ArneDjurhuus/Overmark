@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -9,6 +9,8 @@ type Props = {
   delay?: number;
   className?: string;
   accentColor?: string;
+  onClick?: () => void;
+  ariaLabel?: string;
 };
 
 export function AnimatedCard({
@@ -17,33 +19,66 @@ export function AnimatedCard({
   delay = 0,
   className,
   accentColor = "from-white/60 to-white/40",
+  onClick,
+  ariaLabel,
 }: Props) {
+  const prefersReducedMotion = useReducedMotion();
+
+  const cardVariants = prefersReducedMotion
+    ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
+    : {
+        initial: { opacity: 0, y: 30, scale: 0.95 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+      };
+
+  const hoverVariants = prefersReducedMotion
+    ? {}
+    : { scale: 1.02, y: -4 };
+
+  const tapVariants = prefersReducedMotion
+    ? {}
+    : { scale: 0.98 };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      role={onClick ? "button" : "article"}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={ariaLabel}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      initial={cardVariants.initial}
+      animate={cardVariants.animate}
       transition={{
-        duration: 0.5,
-        delay,
+        duration: prefersReducedMotion ? 0 : 0.5,
+        delay: prefersReducedMotion ? 0 : delay,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      whileHover={{ scale: 1.02, y: -4 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={hoverVariants}
+      whileTap={tapVariants}
       className={[
         "group relative overflow-hidden rounded-3xl p-6",
         "backdrop-blur-xl border border-white/30",
         `bg-gradient-to-br ${accentColor}`,
         "shadow-xl shadow-black/5",
         "transition-shadow duration-300 hover:shadow-2xl hover:shadow-black/10",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-500",
+        onClick ? "cursor-pointer" : "",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
     >
       {/* Shine effect on hover */}
-      <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-      </div>
+      {!prefersReducedMotion && (
+        <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+        </div>
+      )}
 
       {/* Icon container */}
       {icon && (
