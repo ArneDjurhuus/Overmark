@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Utensils, Home as HomeIcon, Calendar, MessageCircle, Sparkles, Building2, ExternalLink, Clock, CalendarDays } from "lucide-react";
+import { Utensils, Home as HomeIcon, Calendar, Sparkles, Building2, ExternalLink, Clock, CalendarDays } from "lucide-react";
 import { DynamicBackground } from "./components/DynamicBackground";
 import { AnimatedCard } from "./components/AnimatedCard";
 import Link from "next/link";
@@ -120,7 +120,7 @@ export default function Home() {
           {/* Main greeting */}
           <div className="text-center">
             <motion.h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-800 bg-clip-text text-transparent mb-4"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-linear-to-r from-zinc-900 via-zinc-700 to-zinc-800 bg-clip-text text-transparent mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -170,8 +170,8 @@ export default function Home() {
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 w-full bg-gradient-to-r from-orange-200/80 to-orange-100/40 rounded-full animate-pulse" />
-                    <div className="h-3 w-2/3 bg-gradient-to-r from-orange-200/60 to-orange-100/30 rounded-full animate-pulse" />
+                    <div className="h-3 w-full bg-linear-to-r from-orange-200/80 to-orange-100/40 rounded-full animate-pulse" />
+                    <div className="h-3 w-2/3 bg-linear-to-r from-orange-200/60 to-orange-100/30 rounded-full animate-pulse" />
                   </div>
                   <motion.span
                     className="text-3xl"
@@ -245,34 +245,6 @@ export default function Home() {
               </AnimatedCard>
             </Link>
           </motion.div>
-
-          {/* Snakkerum */}
-          <motion.div variants={item}>
-            <Link href="/snakkerum">
-              <AnimatedCard
-                icon={<MessageCircle className="w-6 h-6 text-emerald-600" />}
-                delay={0.3}
-                accentColor="from-emerald-100/80 to-teal-50/60"
-                ariaLabel="Gå til snakkerum"
-              >
-                <h3 className="text-lg font-semibold text-zinc-800 mb-1">
-                  Snakkerum
-                </h3>
-                <p className="text-zinc-600 text-sm mb-3">
-                  Chat med andre beboere
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
-                  </span>
-                  <span className="text-sm text-emerald-700 font-medium">
-                    Fælles snak
-                  </span>
-                </div>
-              </AnimatedCard>
-            </Link>
-          </motion.div>
         </motion.div>
 
         {/* Boligsøgning Section */}
@@ -308,7 +280,7 @@ export default function Home() {
                   transition={{ delay: 0.9 + i * 0.05 }}
                 >
                   <span className="truncate">{link.name}</span>
-                  <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-70" />
                 </motion.a>
               ))}
             </div>
@@ -323,7 +295,7 @@ export default function Home() {
           className="mt-12 pb-6 space-y-4"
         >
           <div className="flex items-center justify-center gap-2">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-zinc-300 to-transparent" />
+            <div className="h-px flex-1 bg-linear-to-r from-transparent via-zinc-300 to-transparent" />
             <motion.span
               className="text-zinc-400 text-lg"
               animate={{ opacity: [0.5, 1, 0.5] }}
@@ -331,7 +303,7 @@ export default function Home() {
             >
               ✨
             </motion.span>
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-zinc-300 to-transparent" />
+            <div className="h-px flex-1 bg-linear-to-l from-transparent via-zinc-300 to-transparent" />
           </div>
           <p className="text-center text-sm text-zinc-500">
             Tryk på et kort for at se mere

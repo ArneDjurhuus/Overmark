@@ -1,11 +1,14 @@
 /**
  * User role types for Overmarksgården
  * 
- * - beboer: Resident - can view content, participate in chat
- * - personale: Staff - can edit calendars, meal plans, moderate chat
+ * Database uses English values: resident, staff, admin
+ * UI displays Danish labels: Beboer, Personale, Administrator
+ * 
+ * - resident: Resident - can view content (read-only)
+ * - staff: Staff - can manage calendars, meal plans via admin panel
  * - admin: Administrator - full access including user management
  */
-export type UserRole = "beboer" | "personale" | "admin";
+export type UserRole = "resident" | "staff" | "admin";
 
 /**
  * Profile type matching the Supabase profiles table
@@ -24,7 +27,7 @@ export type Profile = {
  * Helper to check if a role has staff-level permissions
  */
 export function isStaffOrAdmin(role: UserRole | string): boolean {
-  return role === "personale" || role === "admin" || role === "staff";
+  return role === "staff" || role === "admin" || role === "personale";
 }
 
 /**

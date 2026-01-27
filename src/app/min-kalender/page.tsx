@@ -6,8 +6,6 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Plus,
-  X,
   Clock,
   AlertCircle,
 } from "lucide-react";
@@ -49,8 +47,6 @@ export default function MinKalenderPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   const fetchEvents = useCallback(async () => {
@@ -122,16 +118,6 @@ export default function MinKalenderPage() {
             <h1 className="text-2xl font-bold text-zinc-800">Min Kalender</h1>
             <p className="text-zinc-600">Dine personlige aftaler</p>
           </div>
-          <button
-            onClick={() => {
-              setSelectedDate(new Date());
-              setShowAddModal(true);
-            }}
-            className="p-3 rounded-2xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-lg"
-            aria-label="Tilføj ny aftale"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
         </motion.div>
 
         {/* Month Navigation */}
@@ -175,7 +161,7 @@ export default function MinKalenderPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-700 text-sm">{error}</p>
           </motion.div>
         )}
@@ -207,16 +193,12 @@ export default function MinKalenderPage() {
               const hasEvents = dayEvents.length > 0;
 
               return (
-                <button
+                <div
                   key={dateStr}
-                  onClick={() => {
-                    setSelectedDate(date);
-                    setShowAddModal(true);
-                  }}
-                  className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm transition-colors relative ${
+                  className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm relative ${
                     isToday
                       ? "bg-blue-500 text-white font-bold"
-                      : "hover:bg-white/50 text-zinc-700"
+                      : "text-zinc-700"
                   }`}
                 >
                   {date.getDate()}
@@ -227,7 +209,7 @@ export default function MinKalenderPage() {
                       }`}
                     />
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
@@ -258,7 +240,7 @@ export default function MinKalenderPage() {
                 <Calendar className="w-12 h-12 text-zinc-400 mx-auto mb-3" />
                 <p className="text-zinc-600">Ingen aftaler denne måned</p>
                 <p className="text-sm text-zinc-500 mt-1">
-                  Tryk på + for at tilføje en aftale
+                  Kontakt personalet for at tilføje aftaler
                 </p>
               </div>
             </AnimatedCard>
@@ -270,7 +252,7 @@ export default function MinKalenderPage() {
                   delay={prefersReducedMotion ? 0 : idx * 0.05}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
                       <Clock className="w-5 h-5 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -293,164 +275,7 @@ export default function MinKalenderPage() {
             </div>
           )}
         </motion.div>
-
-        {/* Add Event Modal */}
-        {showAddModal && (
-          <AddEventModal
-            selectedDate={selectedDate}
-            onClose={() => setShowAddModal(false)}
-            onSaved={() => {
-              setShowAddModal(false);
-              fetchEvents();
-            }}
-          />
-        )}
       </div>
     </DynamicBackground>
-  );
-}
-
-function AddEventModal({
-  selectedDate,
-  onClose,
-  onSaved,
-}: {
-  selectedDate: Date | null;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(
-    selectedDate?.toISOString().split("T")[0] || ""
-  );
-  const [time, setTime] = useState("12:00");
-  const [allDay, setAllDay] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-
-    setSaving(true);
-    const supabase = createSupabaseBrowserClient();
-
-    const startsAt = allDay
-      ? `${date}T00:00:00`
-      : `${date}T${time}:00`;
-
-    const { error } = await supabase.from("private_events").insert({
-      title: title.trim(),
-      description: description.trim() || null,
-      starts_at: startsAt,
-      all_day: allDay,
-    });
-
-    if (!error) {
-      onSaved();
-    }
-    setSaving(false);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/50"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-zinc-800">Ny aftale</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl hover:bg-zinc-100 transition-colors"
-            aria-label="Luk"
-          >
-            <X className="w-5 h-5 text-zinc-600" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Titel *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-              placeholder="F.eks. Lægebesøg"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">
-              Beskrivelse
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
-              rows={2}
-              placeholder="Valgfri beskrivelse..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">
-                Dato
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                required
-              />
-            </div>
-            {!allDay && (
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">
-                  Tidspunkt
-                </label>
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                />
-              </div>
-            )}
-          </div>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={allDay}
-              onChange={(e) => setAllDay(e.target.checked)}
-              className="w-5 h-5 rounded border-zinc-300 text-blue-500 focus:ring-blue-200"
-            />
-            <span className="text-zinc-700">Heldagsbegivenhed</span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={saving || !title.trim()}
-            className="w-full py-4 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {saving ? "Gemmer..." : "Gem aftale"}
-          </button>
-        </form>
-      </motion.div>
-    </motion.div>
   );
 }

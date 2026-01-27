@@ -4,5 +4,9 @@
             "approve": true,
             "matchCommandLine": true
         }
-    }
+    },
+    "github.copilot.chat.agent.autoFix": false,
+    "github.copilot.chat.alternateGeminiModelFPrompt.enabled": true,
+    "github.copilot.chat.alternateGptPrompt.enabled": false,
+    "github.copilot.chat.agent.currentEditorContext.enabled": false
 }

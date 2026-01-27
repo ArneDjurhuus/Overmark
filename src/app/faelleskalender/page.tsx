@@ -207,7 +207,7 @@ export default function FaelleskalenderPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-700 text-sm">{error}</p>
           </motion.div>
         )}
@@ -259,7 +259,7 @@ export default function FaelleskalenderPage() {
                     >
                       <div className="flex gap-4">
                         {/* Time column */}
-                        <div className="flex-shrink-0 w-16 text-center">
+                        <div className="shrink-0 w-16 text-center">
                           <div className="text-lg font-bold text-zinc-800">
                             {formatTime(activity.starts_at)}
                           </div>

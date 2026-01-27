@@ -11,7 +11,9 @@ import {
   Moon,
   Shield,
   AlertCircle,
+  Settings,
 } from "lucide-react";
+import { isStaffOrAdmin } from "@/types/user";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -95,8 +97,10 @@ export default function ProfilPage() {
     router.refresh();
   };
 
-  const displayName =
-    profile?.display_name || profile?.full_name || "Beboer";
+  // For residents, show "Værelse X", for staff show their name
+  const displayName = profile?.role === 'resident' && profile?.room_number
+    ? `Værelse ${profile.room_number}`
+    : profile?.display_name || profile?.full_name || "Bruger";
 
   return (
     <DynamicBackground>
@@ -117,7 +121,7 @@ export default function ProfilPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-700 text-sm">{error}</p>
           </motion.div>
         )}
@@ -132,8 +136,8 @@ export default function ProfilPage() {
             {/* Profile Card */}
             <AnimatedCard delay={0.1}>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                  {displayName.charAt(0).toUpperCase()}
+                <div className="w-16 h-16 rounded-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  {profile.room_number || displayName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold text-zinc-800">
@@ -147,11 +151,6 @@ export default function ProfilPage() {
                     >
                       {getRoleLabel(profile.role)}
                     </span>
-                    {profile.room_number && (
-                      <span className="text-xs text-zinc-500">
-                        Værelse {profile.room_number}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -177,6 +176,29 @@ export default function ProfilPage() {
                 </button>
               </div>
             </AnimatedCard>
+
+            {/* Admin Panel Link - Only visible for staff/admin */}
+            {isStaffOrAdmin(profile.role) && (
+              <AnimatedCard delay={0.25}>
+                <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-4">
+                  Administration
+                </h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => router.push("/admin")}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
+                      <Settings className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="flex-1 text-left font-medium text-purple-800">
+                      Åbn admin panel
+                    </span>
+                    <ChevronRight className="w-5 h-5 text-purple-400" />
+                  </button>
+                </div>
+              </AnimatedCard>
+            )}
 
             {/* Settings */}
             <AnimatedCard delay={0.3}>

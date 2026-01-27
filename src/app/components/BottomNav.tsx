@@ -3,13 +3,12 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Home, Utensils, Calendar, MessageCircle, User } from "lucide-react";
+import { Home, Utensils, Calendar, User } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: Home, label: "Hjem" },
   { href: "/madplan", icon: Utensils, label: "Madplan" },
   { href: "/faelleskalender", icon: Calendar, label: "Kalender" },
-  { href: "/snakkerum", icon: MessageCircle, label: "Chat" },
   { href: "/profil", icon: User, label: "Profil" },
 ];
 

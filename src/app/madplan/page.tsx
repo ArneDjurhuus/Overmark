@@ -165,7 +165,7 @@ export default function MadplanPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 rounded-2xl bg-red-50/80 border border-red-200/50 flex items-center gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-700 text-sm">{error}</p>
           </motion.div>
         )}
@@ -190,7 +190,7 @@ export default function MadplanPage() {
                 <div className="flex items-start gap-4">
                   {/* Date badge */}
                   <div
-                    className={`flex-shrink-0 w-16 h-16 rounded-2xl flex flex-col items-center justify-center ${
+                    className={`shrink-0 w-16 h-16 rounded-2xl flex flex-col items-center justify-center ${
                       isToday
                         ? "bg-amber-500 text-white"
                         : "bg-white/50 text-zinc-700"
