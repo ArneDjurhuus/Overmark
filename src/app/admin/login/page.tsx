@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -21,44 +21,58 @@ export default function AdminLoginPage() {
     const supabase = createSupabaseBrowserClient();
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      // Sign in with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) throw signInError;
+      if (authError) {
+        if (authError.message.includes("Invalid login credentials")) {
+          setError("Forkert email eller adgangskode.");
+        } else {
+          setError(authError.message);
+        }
+        setLoading(false);
+        return;
+      }
 
-      // Check if user is staff or admin
+      if (!authData.user) {
+        setError("Kunne ikke logge ind. Prøv igen.");
+        setLoading(false);
+        return;
+      }
+
+      // Check if user has admin/staff role
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
-        .eq("id", data.user.id)
+        .eq("id", authData.user.id)
         .single();
 
-      if (profileError) throw profileError;
-
-      if (profile.role !== "staff" && profile.role !== "admin") {
+      if (profileError || !profile) {
         await supabase.auth.signOut();
-        throw new Error("Du har ikke adgang til administrationspanelet.");
+        setError("Kunne ikke verificere brugerrettigheder.");
+        setLoading(false);
+        return;
       }
 
-      // Redirect to admin dashboard
+      const allowedRoles = ["admin", "staff", "personale"];
+      if (!allowedRoles.includes(profile.role)) {
+        await supabase.auth.signOut();
+        setError("Du har ikke adgang til administrationen.");
+        setLoading(false);
+        return;
+      }
+
       router.push("/admin");
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
-      if (err instanceof Error) {
-        if (err.message.includes("Invalid login credentials")) {
-          setError("Forkert email eller adgangskode.");
-        } else {
-          setError(err.message);
-        }
-      } else {
-        setError("Der skete en fejl. Prøv igen.");
-      }
-    } finally {
-      setLoading(false);
+      setError("Der opstod en fejl. Prøv igen.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -102,7 +116,7 @@ export default function AdminLoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="din@email.dk"
+                  placeholder="admin@overmarksgaarden.dk"
                   required
                   className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
                 />
@@ -119,7 +133,7 @@ export default function AdminLoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="admin123"
                   required
                   className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
                 />
@@ -152,6 +166,7 @@ export default function AdminLoginPage() {
               )}
             </button>
           </form>
+
         </motion.div>
 
         <p className="text-center text-slate-500 text-sm mt-6">

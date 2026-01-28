@@ -63,7 +63,7 @@ export function AnimatedCard({
       className={[
         "group relative overflow-hidden rounded-3xl p-6",
         "backdrop-blur-xl border border-white/30",
-        `bg-gradient-to-br ${accentColor}`,
+        `bg-linear-to-br ${accentColor}`,
         "shadow-xl shadow-black/5",
         "transition-shadow duration-300 hover:shadow-2xl hover:shadow-black/10",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-500",
@@ -76,7 +76,7 @@ export function AnimatedCard({
       {/* Shine effect on hover */}
       {!prefersReducedMotion && (
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         </div>
       )}
 

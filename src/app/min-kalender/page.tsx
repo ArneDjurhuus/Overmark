@@ -74,7 +74,32 @@ export default function MinKalenderPage() {
   }, [currentMonth]);
 
   useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    
     fetchEvents();
+
+    // Subscribe to realtime updates for private events
+    const channel = supabase
+      .channel("private-events-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "private_events" },
+        (payload) => {
+          console.log("[Realtime] Private events update received:", payload.eventType);
+          fetchEvents();
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[Realtime] Connected to private_events channel");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime] Private events channel error:", err);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchEvents]);
 
   const getEventsForDate = (date: Date): PrivateEvent[] => {

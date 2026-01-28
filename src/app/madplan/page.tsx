@@ -86,15 +86,24 @@ export default function MadplanPage() {
 
     fetchMeals();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates with status logging
     const channel = supabase
       .channel("meals-changes")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "meals" },
-        () => fetchMeals()
+        (payload) => {
+          console.log("[Realtime] Meals update received:", payload.eventType);
+          fetchMeals();
+        }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[Realtime] Connected to meals channel");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime] Meals channel error:", err);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

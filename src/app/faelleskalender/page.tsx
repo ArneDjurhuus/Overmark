@@ -123,15 +123,24 @@ export default function FaelleskalenderPage() {
 
     fetchActivities();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates with status logging
     const channel = supabase
       .channel("activities-changes")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "activities" },
-        () => fetchActivities()
+        (payload) => {
+          console.log("[Realtime] Activities update received:", payload.eventType);
+          fetchActivities();
+        }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[Realtime] Connected to activities channel");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("[Realtime] Activities channel error:", err);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

@@ -159,23 +159,38 @@ export default function AdminMadplanPage() {
     };
 
     try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Du skal være logget ind for at gemme måltider.");
+        setSaving(false);
+        return;
+      }
+
       if (editingMeal) {
         const { error } = await supabase
           .from("meals")
           .update(mealData)
           .eq("id", editingMeal.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase update error:", error.message, error.code, error.details);
+          throw new Error(error.message || "Kunne ikke opdatere måltid");
+        }
       } else {
         const { error } = await supabase.from("meals").insert(mealData);
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase insert error:", error.message, error.code, error.details);
+          throw new Error(error.message || "Kunne ikke oprette måltid");
+        }
       }
 
       setShowModal(false);
       fetchMeals();
     } catch (err) {
-      console.error("Error saving meal:", err);
-      setError("Kunne ikke gemme måltidet. Prøv igen.");
+      const message = err instanceof Error ? err.message : "Ukendt fejl";
+      console.error("Error saving meal:", message);
+      setError(`Kunne ikke gemme måltidet: ${message}`);
     } finally {
       setSaving(false);
     }

@@ -17,7 +17,6 @@ import {
   X,
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { isStaffOrAdmin } from "@/types/user";
 
 const adminNavItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
@@ -32,24 +31,25 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [authorized, setAuthorized] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userName, setUserName] = useState("");
   const router = useRouter();
   const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+  
+  const [authorized, setAuthorized] = useState(isLoginPage);
+  const [loading, setLoading] = useState(!isLoginPage);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     // Skip auth check on login page
-    if (pathname === "/admin/login") {
-      setAuthorized(true);
-      setLoading(false);
+    if (isLoginPage) {
       return;
     }
 
     async function checkAuth() {
       const supabase = createSupabaseBrowserClient();
       
+      // Check Supabase session
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -57,29 +57,38 @@ export default function AdminLayout({
         return;
       }
 
-      const { data: profile } = await supabase
+      // Check user role from profiles table
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role, display_name, full_name")
         .eq("id", user.id)
         .single();
 
-      if (!profile || !isStaffOrAdmin(profile.role)) {
-        router.push("/");
+      if (profileError || !profile) {
+        console.error("Profile error:", profileError);
+        router.push("/admin/login");
         return;
       }
 
-      setUserName(profile.display_name || profile.full_name || "Admin");
+      const allowedRoles = ["admin", "staff", "personale"];
+      if (!allowedRoles.includes(profile.role)) {
+        router.push("/admin/login");
+        return;
+      }
+
+      setUserName(profile.display_name || profile.full_name || user.email?.split("@")[0] || "Admin");
       setAuthorized(true);
       setLoading(false);
     }
 
     checkAuth();
-  }, [router, pathname]);
+  }, [router, isLoginPage]);
 
   const handleLogout = async () => {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
     router.push("/admin/login");
+    router.refresh();
   };
 
   // For login page, just render children without layout

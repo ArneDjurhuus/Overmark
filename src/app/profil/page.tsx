@@ -59,8 +59,11 @@ export default function ProfilPage() {
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    let userId: string | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
     async function loadProfile() {
-      const supabase = createSupabaseBrowserClient();
       try {
         const {
           data: { user },
@@ -71,6 +74,8 @@ export default function ProfilPage() {
           return;
         }
 
+        userId = user.id;
+
         const { data, error: fetchError } = await supabase
           .from("profiles")
           .select("*")
@@ -79,6 +84,32 @@ export default function ProfilPage() {
 
         if (fetchError) throw fetchError;
         setProfile(data);
+
+        // Subscribe to realtime updates for this user's profile
+        channel = supabase
+          .channel(`profile-changes-${user.id}`)
+          .on(
+            "postgres_changes",
+            { 
+              event: "*", 
+              schema: "public", 
+              table: "profiles",
+              filter: `id=eq.${user.id}`
+            },
+            (payload) => {
+              console.log("[Realtime] Profile update received:", payload.eventType);
+              if (payload.new) {
+                setProfile(payload.new as Profile);
+              }
+            }
+          )
+          .subscribe((status, err) => {
+            if (status === "SUBSCRIBED") {
+              console.log("[Realtime] Connected to profile channel");
+            } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+              console.error("[Realtime] Profile channel error:", err);
+            }
+          });
       } catch (err) {
         console.error("Error loading profile:", err);
         setError("Kunne ikke hente din profil. Prøv igen senere.");
@@ -88,6 +119,12 @@ export default function ProfilPage() {
     }
 
     loadProfile();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [router]);
 
   const handleLogout = async () => {
