@@ -28,8 +28,11 @@ export default function AdminLoginPage() {
       });
 
       if (authError) {
+        console.error("Auth error:", authError);
         if (authError.message.includes("Invalid login credentials")) {
           setError("Forkert email eller adgangskode.");
+        } else if (authError.message.includes("fetch")) {
+          setError("Kunne ikke oprette forbindelse til serveren. Tjek din internetforbindelse.");
         } else {
           setError(authError.message);
         }
@@ -69,7 +72,11 @@ export default function AdminLoginPage() {
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
-      setError("Der opstod en fejl. Prøv igen.");
+      if (err instanceof Error && err.message.includes("fetch")) {
+        setError("Netværksfejl. Tjek din internetforbindelse og prøv igen.");
+      } else {
+        setError("Der opstod en fejl. Prøv igen.");
+      }
     }
 
     setLoading(false);
