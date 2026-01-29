@@ -1,12 +1,12 @@
 import type { NextConfig } from "next";
 import nextPwa from "next-pwa";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const withPWA = nextPwa({
   dest: "public",
-  disable: process.env.NODE_ENV === "development",
+  disable: isDev,
 });
-
-const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig: NextConfig = {
   // Static export only for production (Capacitor Android/iOS builds)
@@ -18,4 +18,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+// Skip PWA wrapper in dev to allow Turbopack (much faster)
+export default isDev ? nextConfig : withPWA(nextConfig);

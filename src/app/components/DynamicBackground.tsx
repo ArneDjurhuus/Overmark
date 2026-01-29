@@ -109,7 +109,7 @@ export function DynamicBackground({ children, className }: Props) {
     <div
       className={[
         "relative min-h-screen overflow-hidden transition-colors duration-1000",
-        `bg-gradient-to-br ${gradient.from} ${gradient.via} ${gradient.to}`,
+        `bg-linear-to-br ${gradient.from} ${gradient.via} ${gradient.to}`,
         isNight ? "dark" : "",
         className,
       ]

@@ -121,6 +121,42 @@ export default function AdminBrugerePage() {
     setShowModal(true);
   };
 
+  const generateQRCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
+  const ensureQRCodeForRoom = async (
+    supabase: ReturnType<typeof createSupabaseBrowserClient>,
+    roomNumber: string,
+    residentName: string | null
+  ) => {
+    // Check if QR code exists for this room
+    const { data: existing } = await supabase
+      .from('room_qr_codes')
+      .select('id')
+      .eq('room_number', roomNumber)
+      .eq('is_active', true)
+      .single();
+
+    if (!existing) {
+      // Create new QR code for this room
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase
+        .from('room_qr_codes')
+        .insert({
+          room_number: roomNumber,
+          code: generateQRCode(),
+          resident_name: residentName,
+          created_by: user?.id,
+        });
+    }
+  };
+
   const handleSave = async () => {
     if (!editingProfile) return;
 
@@ -142,6 +178,15 @@ export default function AdminBrugerePage() {
         .eq("id", editingProfile.id);
 
       if (error) throw error;
+
+      // Auto-generate QR code if resident is assigned to a room
+      if (profileData.room_number && profileData.role === 'resident') {
+        await ensureQRCodeForRoom(
+          supabase,
+          profileData.room_number,
+          profileData.display_name || profileData.full_name
+        );
+      }
 
       setShowModal(false);
       fetchProfiles();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Users,
@@ -9,6 +9,7 @@ import {
   MapPin,
   Tag,
   AlertCircle,
+  Calendar,
 } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
@@ -44,10 +45,38 @@ const categoryLabels: Record<string, string> = {
   other: "Andet",
 };
 
-const monthNames = [
-  "Januar", "Februar", "Marts", "April", "Maj", "Juni",
-  "Juli", "August", "September", "Oktober", "November", "December",
+const weekdayNames = [
+  "Søndag",
+  "Mandag",
+  "Tirsdag",
+  "Onsdag",
+  "Torsdag",
+  "Fredag",
+  "Lørdag",
 ];
+
+function getWeekDates(weekOffset: number = 0): Date[] {
+  const today = new Date();
+  const currentDay = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - currentDay + 1 + weekOffset * 7);
+
+  const dates: Date[] = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    dates.push(date);
+  }
+  return dates;
+}
+
+function formatDate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
+function formatDisplayDate(date: Date): string {
+  return date.toLocaleDateString("da-DK", { day: "numeric", month: "short" });
+}
 
 function formatTime(dateStr: string): string {
   return new Date(dateStr).toLocaleTimeString("da-DK", {
@@ -56,32 +85,25 @@ function formatTime(dateStr: string): string {
   });
 }
 
-function formatDateGroup(dateStr: string): string {
-  const date = new Date(dateStr);
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-
-  const dateOnly = date.toISOString().split("T")[0];
-  const todayOnly = today.toISOString().split("T")[0];
-  const tomorrowOnly = tomorrow.toISOString().split("T")[0];
-
-  if (dateOnly === todayOnly) return "I dag";
-  if (dateOnly === tomorrowOnly) return "I morgen";
-
-  return date.toLocaleDateString("da-DK", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
 export default function FaelleskalenderPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [weekOffset, setWeekOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const weekDates = getWeekDates(weekOffset);
+  const startDate = formatDate(weekDates[0]);
+  const endDate = formatDate(weekDates[6]);
+  const weekNumber = getWeekNumber(weekDates[0]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -89,26 +111,16 @@ export default function FaelleskalenderPage() {
     async function fetchActivities() {
       setLoading(true);
       setError(null);
-      const startOfMonth = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth(),
-        1
-      );
-      const endOfMonth = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth() + 1,
-        0,
-        23,
-        59,
-        59
-      );
+      
+      const startDateTime = new Date(startDate + "T00:00:00");
+      const endDateTime = new Date(endDate + "T23:59:59");
 
       try {
         const { data, error: fetchError } = await supabase
           .from("activities")
           .select("*")
-          .gte("starts_at", startOfMonth.toISOString())
-          .lte("starts_at", endOfMonth.toISOString())
+          .gte("starts_at", startDateTime.toISOString())
+          .lte("starts_at", endDateTime.toISOString())
           .order("starts_at");
 
         if (fetchError) throw fetchError;
@@ -123,7 +135,6 @@ export default function FaelleskalenderPage() {
 
     fetchActivities();
 
-    // Subscribe to realtime updates with status logging
     const channel = supabase
       .channel("activities-changes")
       .on(
@@ -145,22 +156,14 @@ export default function FaelleskalenderPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentMonth]);
+  }, [startDate, endDate]);
 
-  // Group activities by date
-  const groupedActivities = useMemo(() => {
-    const groups: Record<string, Activity[]> = {};
-    activities.forEach((activity) => {
-      const dateKey = activity.starts_at.split("T")[0];
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
-      }
-      groups[dateKey].push(activity);
-    });
-    return groups;
-  }, [activities]);
+  const getActivitiesForDate = (date: Date): Activity[] => {
+    const dateStr = formatDate(date);
+    return activities.filter((a) => a.starts_at.startsWith(dateStr));
+  };
 
-  const sortedDates = Object.keys(groupedActivities).sort();
+  const today = formatDate(new Date());
 
   return (
     <DynamicBackground>
@@ -175,7 +178,7 @@ export default function FaelleskalenderPage() {
           <p className="text-zinc-600">Aktiviteter for alle beboere</p>
         </motion.div>
 
-        {/* Month Navigation */}
+        {/* Week Navigation */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -183,31 +186,45 @@ export default function FaelleskalenderPage() {
           className="flex items-center justify-between mb-6 p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/30"
         >
           <button
-            onClick={() =>
-              setCurrentMonth(
-                new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-              )
-            }
+            onClick={() => setWeekOffset((w) => w - 1)}
             className="min-w-12 min-h-12 p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors flex items-center justify-center"
-            aria-label="Forrige måned"
+            aria-label="Forrige uge"
           >
             <ChevronLeft className="w-5 h-5 text-zinc-700" />
           </button>
-          <span className="font-semibold text-zinc-800 text-lg">
-            {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-          </span>
+          <div className="text-center">
+            <span className="font-semibold text-zinc-800 text-lg block">
+              Uge {weekNumber}
+            </span>
+            <span className="text-sm text-zinc-600">
+              {formatDisplayDate(weekDates[0])} – {formatDisplayDate(weekDates[6])}
+            </span>
+          </div>
           <button
-            onClick={() =>
-              setCurrentMonth(
-                new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
-              )
-            }
+            onClick={() => setWeekOffset((w) => w + 1)}
             className="min-w-12 min-h-12 p-3 rounded-xl bg-white/50 hover:bg-white/70 transition-colors flex items-center justify-center"
-            aria-label="Næste måned"
+            aria-label="Næste uge"
           >
             <ChevronRight className="w-5 h-5 text-zinc-700" />
           </button>
         </motion.div>
+
+        {/* Today button */}
+        {weekOffset !== 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 flex justify-center"
+          >
+            <button
+              onClick={() => setWeekOffset(0)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
+            >
+              <Calendar className="w-4 h-4" />
+              Gå til denne uge
+            </button>
+          </motion.div>
+        )}
 
         {/* Error Display */}
         {error && (
@@ -221,111 +238,106 @@ export default function FaelleskalenderPage() {
           </motion.div>
         )}
 
-        {/* Activities List */}
+        {/* Weekly Activities */}
         {loading ? (
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 bg-white/30 rounded-2xl animate-pulse"
-              />
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div key={i} className="h-24 bg-white/30 rounded-2xl animate-pulse" />
             ))}
           </div>
-        ) : sortedDates.length === 0 ? (
-          <AnimatedCard>
-            <div className="text-center py-12">
-              <Users className="w-16 h-16 text-zinc-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-zinc-700 mb-2">
-                Ingen aktiviteter denne måned
-              </h3>
-              <p className="text-zinc-500">
-                Tjek tilbage senere for nye begivenheder
-              </p>
-            </div>
-          </AnimatedCard>
         ) : (
-          <div className="space-y-6">
-            {sortedDates.map((dateKey, groupIdx) => (
-              <div key={dateKey}>
-                {/* Date Header */}
-                <motion.h2
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: prefersReducedMotion ? 0 : groupIdx * 0.05 }}
-                  className="text-lg font-semibold text-zinc-800 mb-3 capitalize"
+          <div className="space-y-4">
+            {weekDates.map((date, idx) => {
+              const dateStr = formatDate(date);
+              const isToday = dateStr === today;
+              const dayActivities = getActivitiesForDate(date);
+              const dayOfWeek = date.getDay();
+
+              return (
+                <AnimatedCard
+                  key={dateStr}
+                  delay={prefersReducedMotion ? 0 : idx * 0.05}
+                  className={isToday ? "ring-2 ring-blue-400 ring-offset-2" : ""}
                 >
-                  {formatDateGroup(dateKey + "T12:00:00")}
-                </motion.h2>
-
-                {/* Activities for this date */}
-                <div className="space-y-3">
-                  {groupedActivities[dateKey].map((activity, idx) => (
-                    <AnimatedCard
-                      key={activity.id}
-                      delay={
-                        prefersReducedMotion ? 0 : groupIdx * 0.05 + idx * 0.03
-                      }
-                    >
-                      <div className="flex gap-4">
-                        {/* Time column */}
-                        <div className="shrink-0 w-16 text-center">
-                          <div className="text-lg font-bold text-zinc-800">
-                            {formatTime(activity.starts_at)}
-                          </div>
-                          {activity.ends_at && (
-                            <div className="text-xs text-zinc-500">
-                              – {formatTime(activity.ends_at)}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-zinc-800 text-lg">
-                            {activity.title}
-                          </h3>
-
-                          {activity.description && (
-                            <p className="text-zinc-600 text-sm mt-1">
-                              {activity.description}
-                            </p>
-                          )}
-
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {activity.category && (
-                              <span
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
-                                  categoryColors[activity.category] ||
-                                  categoryColors.other
-                                }`}
-                              >
-                                <Tag className="w-3 h-3" />
-                                {categoryLabels[activity.category] ||
-                                  activity.category}
-                              </span>
-                            )}
-
-                            {activity.location && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-zinc-100 text-zinc-700 rounded-lg text-xs">
-                                <MapPin className="w-3 h-3" />
-                                {activity.location}
-                              </span>
-                            )}
-
-                            {activity.max_participants && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-zinc-100 text-zinc-700 rounded-lg text-xs">
-                                <Users className="w-3 h-3" />
-                                Maks {activity.max_participants} deltagere
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                  {/* Day Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center ${
+                          isToday ? "bg-blue-500 text-white" : "bg-zinc-100 text-zinc-700"
+                        }`}
+                      >
+                        <span className="text-xs font-medium uppercase">
+                          {weekdayNames[dayOfWeek].slice(0, 3)}
+                        </span>
+                        <span className="text-lg font-bold leading-none">
+                          {date.getDate()}
+                        </span>
                       </div>
-                    </AnimatedCard>
-                  ))}
-                </div>
-              </div>
-            ))}
+                      <div>
+                        <h3 className="font-semibold text-zinc-800">{weekdayNames[dayOfWeek]}</h3>
+                        <p className="text-sm text-zinc-500">{formatDisplayDate(date)}</p>
+                      </div>
+                    </div>
+                    {isToday && (
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        I dag
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Activities for this day */}
+                  {dayActivities.length === 0 ? (
+                    <p className="text-zinc-400 text-sm italic ml-15">Ingen aktiviteter</p>
+                  ) : (
+                    <div className="space-y-3 ml-15">
+                      {dayActivities.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="p-3 rounded-xl bg-white/50 border border-white/30"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="text-sm font-medium text-zinc-600 w-14 shrink-0">
+                              {formatTime(activity.starts_at)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-zinc-800">{activity.title}</h4>
+                              {activity.description && (
+                                <p className="text-sm text-zinc-600 mt-1">{activity.description}</p>
+                              )}
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {activity.category && (
+                                  <span
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium ${
+                                      categoryColors[activity.category] || categoryColors.other
+                                    }`}
+                                  >
+                                    <Tag className="w-3 h-3" />
+                                    {categoryLabels[activity.category] || activity.category}
+                                  </span>
+                                )}
+                                {activity.location && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-lg text-xs">
+                                    <MapPin className="w-3 h-3" />
+                                    {activity.location}
+                                  </span>
+                                )}
+                                {activity.max_participants && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-lg text-xs">
+                                    <Users className="w-3 h-3" />
+                                    Maks {activity.max_participants}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </AnimatedCard>
+              );
+            })}
           </div>
         )}
       </div>

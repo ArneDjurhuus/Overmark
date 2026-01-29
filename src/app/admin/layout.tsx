@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Utensils,
   Calendar,
+  CalendarCheck,
   Users,
   QrCode,
   LogOut,
@@ -22,6 +23,7 @@ const adminNavItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/madplan", icon: Utensils, label: "Madplan" },
   { href: "/admin/kalender", icon: Calendar, label: "Aktiviteter" },
+  { href: "/admin/aftaler", icon: CalendarCheck, label: "Beboer Aftaler" },
   { href: "/admin/brugere", icon: Users, label: "Brugere" },
   { href: "/admin/qr-koder", icon: QrCode, label: "QR-koder" },
 ];

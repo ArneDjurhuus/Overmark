@@ -58,8 +58,3 @@ button, a, [role="button"] {
 * {
   scroll-behavior: smooth;
 }
-
-/* Touch-friendly scrolling */
-.overflow-y-auto {
-  -webkit-overflow-scrolling: touch;
-}

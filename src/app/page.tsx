@@ -36,8 +36,15 @@ function useTimeGreeting() {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    // Update at the start of each minute for efficiency
+    const msToNextMinute = (60 - new Date().getSeconds()) * 1000;
+    const timeout = setTimeout(() => {
+      setNow(new Date());
+      // Then update every 60 seconds
+      const interval = setInterval(() => setNow(new Date()), 60000);
+      return () => clearInterval(interval);
+    }, msToNextMinute);
+    return () => clearTimeout(timeout);
   }, []);
 
   const greeting = useMemo(() => {

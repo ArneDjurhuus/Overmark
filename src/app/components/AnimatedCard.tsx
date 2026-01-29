@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import { memo, useMemo, type ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
@@ -13,7 +13,7 @@ type Props = {
   ariaLabel?: string;
 };
 
-export function AnimatedCard({
+export const AnimatedCard = memo(function AnimatedCard({
   children,
   icon,
   delay = 0,
@@ -24,20 +24,42 @@ export function AnimatedCard({
 }: Props) {
   const prefersReducedMotion = useReducedMotion();
 
-  const cardVariants = prefersReducedMotion
-    ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
-    : {
-        initial: { opacity: 0, y: 30, scale: 0.95 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-      };
+  const cardVariants = useMemo(() => 
+    prefersReducedMotion
+      ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
+      : {
+          initial: { opacity: 0, y: 30, scale: 0.95 },
+          animate: { opacity: 1, y: 0, scale: 1 },
+        },
+    [prefersReducedMotion]
+  );
 
-  const hoverVariants = prefersReducedMotion
-    ? {}
-    : { scale: 1.02, y: -4 };
+  const hoverVariants = useMemo(() =>
+    prefersReducedMotion ? {} : { scale: 1.02, y: -4 },
+    [prefersReducedMotion]
+  );
 
-  const tapVariants = prefersReducedMotion
-    ? {}
-    : { scale: 0.98 };
+  const tapVariants = useMemo(() =>
+    prefersReducedMotion ? {} : { scale: 0.98 },
+    [prefersReducedMotion]
+  );
+
+  const transitionConfig = useMemo(() => ({
+    duration: prefersReducedMotion ? 0 : 0.5,
+    delay: prefersReducedMotion ? 0 : delay,
+    ease: [0.25, 0.46, 0.45, 0.94] as const,
+  }), [prefersReducedMotion, delay]);
+
+  const cardClassName = useMemo(() => [
+    "group relative overflow-hidden rounded-3xl p-6",
+    "backdrop-blur-xl border border-white/30",
+    `bg-linear-to-br ${accentColor}`,
+    "shadow-xl shadow-black/5",
+    "transition-shadow duration-300 hover:shadow-2xl hover:shadow-black/10",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-500",
+    onClick ? "cursor-pointer" : "",
+    className,
+  ].filter(Boolean).join(" "), [accentColor, onClick, className]);
 
   return (
     <motion.div
@@ -53,25 +75,10 @@ export function AnimatedCard({
       }}
       initial={cardVariants.initial}
       animate={cardVariants.animate}
-      transition={{
-        duration: prefersReducedMotion ? 0 : 0.5,
-        delay: prefersReducedMotion ? 0 : delay,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
+      transition={transitionConfig}
       whileHover={hoverVariants}
       whileTap={tapVariants}
-      className={[
-        "group relative overflow-hidden rounded-3xl p-6",
-        "backdrop-blur-xl border border-white/30",
-        `bg-linear-to-br ${accentColor}`,
-        "shadow-xl shadow-black/5",
-        "transition-shadow duration-300 hover:shadow-2xl hover:shadow-black/10",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-zinc-500",
-        onClick ? "cursor-pointer" : "",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={cardClassName}
     >
       {/* Shine effect on hover */}
       {!prefersReducedMotion && (
@@ -94,4 +101,4 @@ export function AnimatedCard({
       <div className="relative z-10">{children}</div>
     </motion.div>
   );
-}
+});
