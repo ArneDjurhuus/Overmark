@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Utensils, ChevronLeft, ChevronRight, Leaf, AlertTriangle, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Leaf, AlertTriangle, AlertCircle } from "lucide-react";
 import { DynamicBackground } from "../components/DynamicBackground";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "./components/BottomNav";
+import { CapacitorInit } from "./components/CapacitorInit";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,10 @@ export const metadata: Metadata = {
   title: "Overmarksgården Intra",
   description: "Overmarksgården Intra – et digitalt hjem for beboere og personale.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icons/icon-192.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -27,8 +32,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
   viewportFit: "cover",
 };
 
@@ -42,6 +45,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans antialiased`}
       >
+        <CapacitorInit />
         {children}
         <BottomNav />
       </body>

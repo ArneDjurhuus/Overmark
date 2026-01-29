@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Utensils, Home as HomeIcon, Calendar, Sparkles, Building2, ExternalLink, Clock, CalendarDays } from "lucide-react";
+import { Utensils, Calendar, Sparkles, Building2, ExternalLink, Clock, CalendarDays } from "lucide-react";
 import { DynamicBackground } from "./components/DynamicBackground";
 import { AnimatedCard } from "./components/AnimatedCard";
 import Link from "next/link";

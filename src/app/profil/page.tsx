@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   User,
   ChevronRight,
@@ -56,11 +56,9 @@ export default function ProfilPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    let userId: string | null = null;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function loadProfile() {
@@ -73,8 +71,6 @@ export default function ProfilPage() {
           router.push("/login");
           return;
         }
-
-        userId = user.id;
 
         const { data, error: fetchError } = await supabase
           .from("profiles")

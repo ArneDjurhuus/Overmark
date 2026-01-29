@@ -1,0 +1,5 @@
+# Ignore generated Android assets
+android/
+out/
+.next/
+node_modules/

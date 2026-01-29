@@ -3,9 +3,24 @@
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
+// Only allow this page in development mode
+const isDev = process.env.NODE_ENV === 'development';
+
 export default function TestPage() {
   const [result, setResult] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  // Block access in production
+  if (!isDev) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">404</h1>
+          <p className="text-gray-600">Siden findes ikke</p>
+        </div>
+      </div>
+    );
+  }
 
   const testConnection = async () => {
     setLoading(true);
@@ -16,7 +31,7 @@ export default function TestPage() {
       
       // Test 1: Basic API call
       setResult(prev => prev + "\n1. Testing Supabase connection...");
-      const { data, error } = await supabase.from("profiles").select("count").limit(1);
+      const { error } = await supabase.from("profiles").select("count").limit(1);
       
       if (error) {
         setResult(prev => prev + `\n❌ Database error: ${error.message}`);

@@ -8,5 +8,60 @@
     "github.copilot.chat.agent.autoFix": false,
     "github.copilot.chat.alternateGeminiModelFPrompt.enabled": true,
     "github.copilot.chat.alternateGptPrompt.enabled": false,
-    "github.copilot.chat.agent.currentEditorContext.enabled": false
+    "github.copilot.chat.agent.currentEditorContext.enabled": false,
+    
+    // Exclude generated/build folders from VS Code entirely
+    "files.exclude": {
+        "**/android/app/src/main/assets/**": true,
+        "**/android/app/build/**": true,
+        "**/android/build/**": true,
+        "**/android/capacitor-cordova-android-plugins/build/**": true,
+        "**/out/**": true,
+        "**/.next/**": true
+    },
+    "search.exclude": {
+        "**/android/**": true,
+        "**/out/**": true,
+        "**/.next/**": true
+    },
+    "files.watcherExclude": {
+        "**/android/**": true,
+        "**/out/**": true,
+        "**/.next/**": true
+    },
+    
+    // Disable built-in HTML validation (use HTMLHint instead)
+    "html.validate.scripts": false,
+    "html.validate.styles": false,
+    
+    // CSS validation - disable for generated files
+    "css.validate": true,
+    
+    // HTMLHint - only for src folder
+    "htmlhint.enable": true,
+    "htmlhint.options": {
+        "doctype-first": false
+    },
+    
+    // Webhint
+    "webhint.enableTelemetry": "disabled",
+    "webhint.ignore": [
+        "**/android/**",
+        "**/out/**",
+        "**/node_modules/**",
+        "**/.next/**"
+    ],
+    
+    // General linter exclusions
+    "linter.ignoreGlobs": [
+        "**/android/**",
+        "**/out/**",
+        "**/.next/**"
+    ],
+    
+    // Stylelint
+    "stylelint.ignoreDisables": true,
+    
+    // TypeScript - exclude generated folders
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

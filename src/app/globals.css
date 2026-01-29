@@ -58,3 +58,69 @@ button, a, [role="button"] {
 * {
   scroll-behavior: smooth;
 }
+
+/* Noise texture overlay for backgrounds */
+.noise-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Star positioning using CSS custom properties */
+.star-position {
+  left: var(--star-x);
+  top: var(--star-y);
+  width: var(--star-size);
+  height: var(--star-size);
+}
+
+/* Pre-generated star positions (50 stars with deterministic positions) */
+.star-0 { left: 20.55%; top: 87.23%; width: 2.18px; height: 2.18px; }
+.star-1 { left: 61.08%; top: 44.67%; width: 1.78px; height: 1.78px; }
+.star-2 { left: 1.61%; top: 2.11%; width: 2.36px; height: 2.36px; }
+.star-3 { left: 42.14%; top: 59.55%; width: 1.94px; height: 1.94px; }
+.star-4 { left: 82.67%; top: 16.99%; width: 2.52px; height: 2.52px; }
+.star-5 { left: 23.2%; top: 74.43%; width: 1.1px; height: 1.1px; }
+.star-6 { left: 63.73%; top: 31.87%; width: 2.68px; height: 2.68px; }
+.star-7 { left: 4.26%; top: 89.31%; width: 1.26px; height: 1.26px; }
+.star-8 { left: 44.79%; top: 46.75%; width: 2.84px; height: 2.84px; }
+.star-9 { left: 85.32%; top: 4.19%; width: 1.42px; height: 1.42px; }
+.star-10 { left: 25.85%; top: 61.63%; width: 3px; height: 3px; }
+.star-11 { left: 66.38%; top: 19.07%; width: 1.58px; height: 1.58px; }
+.star-12 { left: 6.91%; top: 76.51%; width: 2.16px; height: 2.16px; }
+.star-13 { left: 47.44%; top: 33.95%; width: 1.74px; height: 1.74px; }
+.star-14 { left: 87.97%; top: 91.39%; width: 2.32px; height: 2.32px; }
+.star-15 { left: 28.5%; top: 48.83%; width: 1.9px; height: 1.9px; }
+.star-16 { left: 69.03%; top: 6.27%; width: 2.48px; height: 2.48px; }
+.star-17 { left: 9.56%; top: 63.71%; width: 1.06px; height: 1.06px; }
+.star-18 { left: 50.09%; top: 21.15%; width: 2.64px; height: 2.64px; }
+.star-19 { left: 90.62%; top: 78.59%; width: 1.22px; height: 1.22px; }
+.star-20 { left: 31.15%; top: 36.03%; width: 2.8px; height: 2.8px; }
+.star-21 { left: 71.68%; top: 93.47%; width: 1.38px; height: 1.38px; }
+.star-22 { left: 12.21%; top: 50.91%; width: 2.96px; height: 2.96px; }
+.star-23 { left: 52.74%; top: 8.35%; width: 1.54px; height: 1.54px; }
+.star-24 { left: 93.27%; top: 65.79%; width: 2.12px; height: 2.12px; }
+.star-25 { left: 33.8%; top: 23.23%; width: 1.7px; height: 1.7px; }
+.star-26 { left: 74.33%; top: 80.67%; width: 2.28px; height: 2.28px; }
+.star-27 { left: 14.86%; top: 38.11%; width: 1.86px; height: 1.86px; }
+.star-28 { left: 55.39%; top: 95.55%; width: 2.44px; height: 2.44px; }
+.star-29 { left: 95.92%; top: 52.99%; width: 1.02px; height: 1.02px; }
+.star-30 { left: 36.45%; top: 10.43%; width: 2.6px; height: 2.6px; }
+.star-31 { left: 76.98%; top: 67.87%; width: 1.18px; height: 1.18px; }
+.star-32 { left: 17.51%; top: 25.31%; width: 2.76px; height: 2.76px; }
+.star-33 { left: 58.04%; top: 82.75%; width: 1.34px; height: 1.34px; }
+.star-34 { left: 98.57%; top: 40.19%; width: 2.92px; height: 2.92px; }
+.star-35 { left: 39.1%; top: 97.63%; width: 1.5px; height: 1.5px; }
+.star-36 { left: 79.63%; top: 55.07%; width: 2.08px; height: 2.08px; }
+.star-37 { left: 20.16%; top: 12.51%; width: 1.66px; height: 1.66px; }
+.star-38 { left: 60.69%; top: 69.95%; width: 2.24px; height: 2.24px; }
+.star-39 { left: 1.22%; top: 27.39%; width: 1.82px; height: 1.82px; }
+.star-40 { left: 41.75%; top: 84.83%; width: 2.4px; height: 2.4px; }
+.star-41 { left: 82.28%; top: 42.27%; width: 1.98px; height: 1.98px; }
+.star-42 { left: 22.81%; top: 99.71%; width: 2.56px; height: 2.56px; }
+.star-43 { left: 63.34%; top: 57.15%; width: 1.14px; height: 1.14px; }
+.star-44 { left: 3.87%; top: 14.59%; width: 2.72px; height: 2.72px; }
+.star-45 { left: 44.4%; top: 72.03%; width: 1.3px; height: 1.3px; }
+.star-46 { left: 84.93%; top: 29.47%; width: 2.88px; height: 2.88px; }
+.star-47 { left: 25.46%; top: 86.91%; width: 1.46px; height: 1.46px; }
+.star-48 { left: 65.99%; top: 44.35%; width: 2.04px; height: 2.04px; }
+.star-49 { left: 6.52%; top: 1.79%; width: 1.62px; height: 1.62px; }
