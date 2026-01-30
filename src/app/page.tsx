@@ -2,10 +2,14 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Utensils, Calendar, Sparkles, Building2, ExternalLink, Clock, CalendarDays } from "lucide-react";
+import { Utensils, Calendar, Sparkles, Building2, ExternalLink, Clock, CalendarDays, Leaf } from "lucide-react";
 import { DynamicBackground } from "./components/DynamicBackground";
 import { AnimatedCard } from "./components/AnimatedCard";
 import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+type TodayMeal = { title: string; vegetarian_option: string | null } | null;
+type UpcomingActivity = { id: string; title: string; starts_at: string; category: string | null };
 
 const housingLinks = [
   { name: "Boligportalen", url: "https://www.boligportalen.dk", color: "bg-blue-500" },
@@ -97,6 +101,58 @@ function LiveClock() {
 export default function Home() {
   const { greeting } = useTimeGreeting();
   const prefersReducedMotion = useReducedMotion();
+  const [todayMeal, setTodayMeal] = useState<TodayMeal>(null);
+  const [upcomingActivities, setUpcomingActivities] = useState<UpcomingActivity[]>([]);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    const today = new Date().toISOString().split("T")[0];
+    
+    // Fetch today's meal
+    supabase
+      .from("meals")
+      .select("title, vegetarian_option")
+      .eq("date", today)
+      .single()
+      .then(({ data }) => setTodayMeal(data));
+
+    // Fetch upcoming activities (next 3 days)
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 3);
+    supabase
+      .from("activities")
+      .select("id, title, starts_at, category")
+      .gte("starts_at", new Date().toISOString())
+      .lte("starts_at", endDate.toISOString())
+      .order("starts_at")
+      .limit(3)
+      .then(({ data }) => setUpcomingActivities(data || []));
+
+    // Subscribe to realtime updates
+    const mealsChannel = supabase
+      .channel("home-meals")
+      .on("postgres_changes", { event: "*", schema: "public", table: "meals" }, () => {
+        supabase.from("meals").select("title, vegetarian_option").eq("date", today).single()
+          .then(({ data }) => setTodayMeal(data));
+      })
+      .subscribe();
+
+    const activitiesChannel = supabase
+      .channel("home-activities")
+      .on("postgres_changes", { event: "*", schema: "public", table: "activities" }, () => {
+        supabase.from("activities").select("id, title, starts_at, category")
+          .gte("starts_at", new Date().toISOString())
+          .lte("starts_at", endDate.toISOString())
+          .order("starts_at").limit(3)
+          .then(({ data }) => setUpcomingActivities(data || []));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(mealsChannel);
+      supabase.removeChannel(activitiesChannel);
+    };
+  }, []);
 
   return (
     <DynamicBackground className="px-4 py-6 pb-24">
@@ -172,18 +228,29 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-zinc-800 mb-1">
                   Madplan
                 </h3>
-                <p className="text-zinc-600 text-sm mb-3">
-                  Se ugens måltider
+                <p className="text-zinc-600 text-sm mb-2">
+                  I dag:
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 w-full bg-linear-to-r from-orange-200/80 to-orange-100/40 rounded-full animate-pulse" />
-                    <div className="h-3 w-2/3 bg-linear-to-r from-orange-200/60 to-orange-100/30 rounded-full animate-pulse" />
+                  <div className="flex-1">
+                    {todayMeal ? (
+                      <>
+                        <p className="font-medium text-zinc-800">{todayMeal.title}</p>
+                        {todayMeal.vegetarian_option && (
+                          <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+                            <Leaf className="w-3 h-3" />
+                            {todayMeal.vegetarian_option}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-zinc-500 text-sm">Ingen mad planlagt</p>
+                    )}
                   </div>
                   <motion.span
                     className="text-3xl"
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    animate={prefersReducedMotion ? undefined : { rotate: [0, 10, -10, 0] }}
+                    transition={prefersReducedMotion ? undefined : { duration: 2, repeat: Infinity, repeatDelay: 3 }}
                   >
                     🍲
                   </motion.span>
@@ -204,23 +271,23 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-zinc-800 mb-1">
                   Fælleskalender
                 </h3>
-                <p className="text-zinc-600 text-sm mb-3">
-                  Se husets aktiviteter
+                <p className="text-zinc-600 text-sm mb-2">
+                  Kommende aktiviteter:
                 </p>
-                <div className="flex gap-2">
-                  {["Ma", "Ti", "On", "To", "Fr", "Lø", "Sø"].map((day, i) => (
-                    <motion.div
-                      key={day}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium ${
-                        i === new Date().getDay() - 1 || (new Date().getDay() === 0 && i === 6)
-                          ? "bg-purple-500 text-white shadow-lg shadow-purple-500/30"
-                          : "bg-white/50 text-zinc-600"
-                      }`}
-                    >
-                      {day}
-                    </motion.div>
-                  ))}
-                </div>
+                {upcomingActivities.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {upcomingActivities.slice(0, 2).map((activity) => (
+                      <div key={activity.id} className="flex items-center gap-2 text-sm">
+                        <span className="w-12 text-purple-600 font-medium">
+                          {new Date(activity.starts_at).toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="text-zinc-700 truncate">{activity.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-zinc-500 text-sm">Ingen kommende aktiviteter</p>
+                )}
               </AnimatedCard>
             </Link>
           </motion.div>

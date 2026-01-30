@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "./components/BottomNav";
 import { CapacitorInit } from "./components/CapacitorInit";
+import { DevLoginBanner } from "./components/DevLoginBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans antialiased`}
       >
+        <DevLoginBanner />
         <CapacitorInit />
         {children}
         <BottomNav />

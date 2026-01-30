@@ -54,14 +54,13 @@ function LoginContent() {
         if (signInError) {
           // 4. If sign in fails, try to sign up (first time use of this code)
           console.log('Sign in failed, trying sign up...', signInError.message);
-          setMessage('Opretter din profil...');
+          setMessage('Opretter login...');
 
           const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
             options: {
               data: {
-                display_name: `Værelse ${qrCode.room_number}`,
                 room_number: qrCode.room_number,
                 role: 'resident',
               },
